@@ -13,7 +13,7 @@ from meltano.edk.process import Invoker, log_subprocess_error
 
 from superset_ext.utils import load_config_from_env
 
-log = structlog.get_logger()
+log = structlog.get_logger("superset_extension")
 
 
 class Superset(ExtensionBase):
@@ -25,10 +25,9 @@ class Superset(ExtensionBase):
         self.env_prefix = "SUPERSET_"
         self.env_config = load_config_from_env(self.env_prefix, trimmed=True)
         self.env_config["PATH"] = os.environ.get("PATH", "")
-        if not self.env_config["FLASK_APP"]:
+        if not self.env_config.get("FLASK_APP"):
             self.env_config["FLASK_APP"] = "superset"
         self.superset_invoker = Invoker(self.superset_bin, env=os.environ.copy())
-        log.debug("initialized superset extension", env_config=self.env_config)
 
     def _write_config(self, force: bool = False) -> None:
         config_path = self.env_config["SUPERSET_CONFIG_PATH"]

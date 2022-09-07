@@ -11,7 +11,7 @@ existing `superset` plugin.
 utilities:
   - name: ext_superset
     namespace: superset
-    pip_url: apache-superset==2.0.0 flask==2.0.3 werkzeug==2.0.3 jinja2==3.0.1 git+https://github.com/meltano/superset-ext.git@feat/init-extension-take2
+    pip_url: apache-superset==2.0.0 flask==2.0.3 werkzeug==2.0.3 jinja2==3.0.1 wtforms==2.3.3 git+https://github.com/meltano/superset-ext.git@feat/init-extension-take2
     executable: superset_invoker
     commands:
       describe:
