@@ -2,7 +2,8 @@
 name = "superset-ext"
 version = "0.0.1"
 description = "`superset-ext` is a Meltano utility extension."
-authors = ["FirstName LastName"]
+authors = ["Meltano Team and Contributors"]
+maintainers = ["Meltano Team and Contributors"]
 license = "Apache 2.0"
 
 [tool.poetry.dependencies]
