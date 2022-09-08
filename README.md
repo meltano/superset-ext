@@ -23,9 +23,9 @@ utilities:
       invoke:
         executable: superset_extension
         args: invoke
-      create-admin:
-        args: fab create-admin
-        executable: superset
+      create_admin:
+        args: create_admin
+        executable: superset_extension
       ui:
         args: invoke run --port 8088 --host 127.0.0.1
     config:
@@ -47,13 +47,16 @@ meltano config superset_ext set SECRET_KEY $(openssl rand -base64 42)
 # explicitly create the superset config python file and call `superset db upgrade`
 meltano invoke superset_ext:initialize
 
+# add a superset admin using prompting for required values
+meltano invoke superset_ext:create_admin
+# add a superset admin passing in required values via flags
+meltano invoke superset_ext:create_admin --username=admin --firstname=admin --lastname=admin --
+email=admin@admin --password=password
+
 # verify that superset can be called via the extensions invoker
 meltano invoke superset_ext version
 # see what other commands are available
 meltano invoke superset_ext --help
-
-# add a superset admin using supersets `fab create-admin` command
-meltano invoke superset_ext:create-admin
 
 # start the superset dev server
 meltano invoke superset_ext:ui

@@ -26,8 +26,8 @@ app = typer.Typer(
 
 @app.command()
 def initialize(
-    ctx: typer.Context,
-    force: bool = typer.Option(False, help="Force initialization (if supported)"),
+        ctx: typer.Context,
+        force: bool = typer.Option(False, help="Force initialization (if supported)"),
 ) -> None:
     """Initialize the Superset plugin."""
     try:
@@ -35,6 +35,25 @@ def initialize(
     except Exception:
         log.exception(
             "initialize failed with uncaught exception, please report to maintainer"
+        )
+        sys.exit(1)
+
+
+@app.command(name="create_admin")
+def create_admin(
+        ctx: typer.Context,
+        username: str = typer.Option("admin", help="Username for the admin user", prompt=True),
+        firstname: str = typer.Option("admin", help="Firstname for the admin user", prompt=True),
+        lastname: str = typer.Option("user", help="Lastname for the admin user", prompt=True),
+        email: str = typer.Option("admin@superset", help="Email for the admin user", prompt=True),
+        password: str = typer.Option(None, help="Password for the admin user", prompt=True, confirmation_prompt=True, hide_input=True),
+) -> None:
+    """Create an admin user."""
+    try:
+        ext.create_admin(username, firstname, lastname, email, password)
+    except Exception:
+        log.exception(
+            "create_admin failed with uncaught exception, please report to maintainer"
         )
         sys.exit(1)
 
@@ -58,9 +77,9 @@ def invoke(ctx: typer.Context, command_args: List[str]) -> None:
 
 @app.command()
 def describe(
-    output_format: DescribeFormat = typer.Option(
-        DescribeFormat.text, "--format", help="Output format"
-    )
+        output_format: DescribeFormat = typer.Option(
+            DescribeFormat.text, "--format", help="Output format"
+        )
 ) -> None:
     """Describe the available commands of this extension."""
     try:
@@ -74,20 +93,20 @@ def describe(
 
 @app.callback(invoke_without_command=True)
 def main(
-    ctx: typer.Context,
-    log_level: str = typer.Option("INFO", envvar="LOG_LEVEL"),
-    log_timestamps: bool = typer.Option(
-        False, envvar="LOG_TIMESTAMPS", help="Show timestamp in logs"
-    ),
-    log_levels: bool = typer.Option(
-        False, "--log-levels", envvar="LOG_LEVELS", help="Show log levels"
-    ),
-    meltano_log_json: bool = typer.Option(
-        False,
-        "--meltano-log-json",
-        envvar="MELTANO_LOG_JSON",
-        help="Log in the meltano JSON log format",
-    ),
+        ctx: typer.Context,
+        log_level: str = typer.Option("INFO", envvar="LOG_LEVEL"),
+        log_timestamps: bool = typer.Option(
+            False, envvar="LOG_TIMESTAMPS", help="Show timestamp in logs"
+        ),
+        log_levels: bool = typer.Option(
+            False, "--log-levels", envvar="LOG_LEVELS", help="Show log levels"
+        ),
+        meltano_log_json: bool = typer.Option(
+            False,
+            "--meltano-log-json",
+            envvar="MELTANO_LOG_JSON",
+            help="Log in the meltano JSON log format",
+        ),
 ) -> None:
     """Simple Meltano extension that wraps the superset CLI."""
     default_logging_config(

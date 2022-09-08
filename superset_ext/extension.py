@@ -30,7 +30,9 @@ class Superset(ExtensionBase):
         self.superset_invoker = Invoker(self.superset_bin, env=self.env_config)
 
     def _write_config(self, force: bool = False) -> bool:
-        config_path = self.env_config.get("SUPERSET_CONFIG_PATH", "superset/superset_config.py")
+        config_path = self.env_config.get(
+            "SUPERSET_CONFIG_PATH", "superset/superset_config.py"
+        )
         if os.path.exists(config_path) and not force:
             log.info(
                 "Superset config already exists",
@@ -66,11 +68,49 @@ class Superset(ExtensionBase):
             try:
                 self.superset_invoker.run("db", "upgrade", stdout=subprocess.DEVNULL)
             except subprocess.CalledProcessError as err:
-                log_subprocess_error("Superset db upgrade", err, "Superset initialization failed")
+                log_subprocess_error(
+                    "Superset db upgrade", err, "Superset initialization failed"
+                )
                 sys.exit(err.returncode)
             log.info("Superset initialized, don't forget to configure an admin user!")
         else:
-            log.info("Superset already initialized, skipping. Rerun with --force to rewrite config.")
+            log.info(
+                "Superset already initialized, skipping. Rerun with --force to rewrite config."
+            )
+
+    def create_admin(
+        self, username: str, first_name: str, last_name: str, email: str, password: str
+    ):
+        """Invoke the underlying superset cli and create an admin user.
+
+        Args:
+            username: The username of the admin user.
+            first_name: The first name of the admin user.
+            last_name: The last name of the admin user.
+            email: The email of the admin user.
+            password: The password of the admin user.
+
+        Returns:
+            Whether the admin user was created.
+        """
+        try:
+            self.superset_invoker.run_and_log(
+                None,
+                [
+                    "fab",
+                    "create-admin",
+                    f"--username={username}",
+                    f"--firstname={first_name}",
+                    f"--lastname={last_name}",
+                    f"--email={email}",
+                    f"--password={password}",
+                ],
+            )
+        except subprocess.CalledProcessError as err:
+            log_subprocess_error(
+                f"superset add_user {username}", err, "Superset create-admin failed"
+            )
+            sys.exit(err.returncode)
 
     def invoke(self, command_name: str | None, *command_args: Any) -> None:
         """Invoke the underlying cli, that is being wrapped by this extension.
@@ -97,7 +137,16 @@ class Superset(ExtensionBase):
         return models.Describe(
             commands=[
                 models.ExtensionCommand(
-                    name="superset_extension", description="extension commands"
+                    name="superset_extension",
+                    description="extension commands",
+                    commands=[
+                        "describe",
+                        "invoke",
+                        "pre_invoke",
+                        "post_invoke",
+                        "initialize",
+                        "create_admin",
+                    ],
                 ),
                 models.InvokerCommand(
                     name="superset_invoker", description="pass through invoker"
