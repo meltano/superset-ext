@@ -26,17 +26,17 @@ class Superset(ExtensionBase):
         self.env_config = load_config_from_env(self.env_prefix, trimmed=True)
         self.env_config["PATH"] = os.environ.get("PATH", "")
         if not self.env_config.get("FLASK_APP"):
-            self.env_config["FLASK_APP"] = "superset"
-        self.superset_invoker = Invoker(self.superset_bin, env=os.environ.copy())
+            self.env_config["FLASK_APP"] = "superset2"
+        self.superset_invoker = Invoker(self.superset_bin, env=self.env_config)
 
-    def _write_config(self, force: bool = False) -> None:
-        config_path = self.env_config["SUPERSET_CONFIG_PATH"]
+    def _write_config(self, force: bool = False) -> bool:
+        config_path = self.env_config.get("SUPERSET_CONFIG_PATH", "superset/superset_config.py")
         if os.path.exists(config_path) and not force:
             log.info(
-                "superset config already exists, skipping initialization",
+                "Superset config already exists",
                 config_path=config_path,
             )
-            return
+            return False
         os.makedirs(os.path.dirname(config_path), exist_ok=True)
         config_script_lines = [
             "import sys",
@@ -45,10 +45,13 @@ class Superset(ExtensionBase):
             "for key, value in config.items():",
             "    if key.isupper():",
             "        setattr(module, key, value)",
+            "",
+            "# add any additional config here #",
+            "",
         ]
         with open(config_path, "w") as config_file:
             config_file.write("\n".join(config_script_lines))
-        log.info("initialized superset config", config_path=config_path)
+        return True
 
     def initialize(self, force: bool = False) -> None:
         """Initialize the superset extension.
@@ -59,9 +62,15 @@ class Superset(ExtensionBase):
         Args:
             force: Whether to force initialization - rewrite the config file.
         """
-        self._write_config(force=force)
-        self.superset_invoker.run("db", "upgrade")
-        log.info("Superset initialized, don't forget to configure an admin user")
+        if self._write_config(force=force):
+            try:
+                self.superset_invoker.run("db", "upgrade", stdout=subprocess.DEVNULL)
+            except subprocess.CalledProcessError as err:
+                log_subprocess_error("Superset db upgrade", err, "Superset initialization failed")
+                sys.exit(err.returncode)
+            log.info("Superset initialized, don't forget to configure an admin user!")
+        else:
+            log.info("Superset already initialized, skipping. Rerun with --force to rewrite config.")
 
     def invoke(self, command_name: str | None, *command_args: Any) -> None:
         """Invoke the underlying cli, that is being wrapped by this extension.
