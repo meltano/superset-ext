@@ -26,7 +26,12 @@ class Superset(ExtensionBase):
         self.env_config = load_config_from_env(self.env_prefix, trimmed=True)
         self.env_config["PATH"] = os.environ.get("PATH", "")
         if not self.env_config.get("FLASK_APP"):
-            self.env_config["FLASK_APP"] = "superset2"
+            self.env_config["FLASK_APP"] = "superset"
+        self.superset_config = {
+            k: v
+            for (k, v) in self.env_config.items()
+            if not k.upper().startswith("EXT_")
+        }
         self.superset_invoker = Invoker(self.superset_bin, env=self.env_config)
 
     def _write_config(self, force: bool = False) -> bool:
@@ -43,7 +48,7 @@ class Superset(ExtensionBase):
         config_script_lines = [
             "import sys",
             "module = sys.modules[__name__]",
-            f"config = {self.env_config!r}",
+            f"config = {self.superset_config!r}",
             "for key, value in config.items():",
             "    if key.isupper():",
             "        setattr(module, key, value)",
@@ -75,7 +80,7 @@ class Superset(ExtensionBase):
             log.info("Superset initialized, don't forget to configure an admin user!")
         else:
             log.info(
-                "Superset already initialized, skipping. Rerun with --force to rewrite config."
+                "Superset already initialized, skipping. Rerun with --force to rewrite config."  # noqa: E501
             )
 
     def create_admin(
