@@ -4,6 +4,7 @@ from __future__ import annotations
 import os
 import subprocess
 import sys
+from pathlib import Path
 from typing import Any
 
 import structlog
@@ -11,7 +12,7 @@ from meltano.edk import models
 from meltano.edk.extension import ExtensionBase
 from meltano.edk.process import Invoker, log_subprocess_error
 
-from superset_ext.utils import load_config_from_env
+from superset_ext.utils import load_config_from_env, write_config
 
 log = structlog.get_logger("superset_extension")
 
@@ -35,30 +36,10 @@ class Superset(ExtensionBase):
         self.superset_invoker = Invoker(self.superset_bin, env=self.env_config)
 
     def _write_config(self, force: bool = False) -> bool:
-        config_path = self.env_config.get(
-            "SUPERSET_CONFIG_PATH", "superset/superset_config.py"
-        )
-        if os.path.exists(config_path) and not force:
-            log.info(
-                "Superset config already exists",
-                config_path=config_path,
-            )
-            return False
-        os.makedirs(os.path.dirname(config_path), exist_ok=True)
-        config_script_lines = [
-            "import sys",
-            "module = sys.modules[__name__]",
-            f"config = {self.superset_config!r}",
-            "for key, value in config.items():",
-            "    if key.isupper():",
-            "        setattr(module, key, value)",
-            "",
-            "# add any additional config here #",
-            "",
-        ]
-        with open(config_path, "w") as config_file:
-            config_file.write("\n".join(config_script_lines))
-        return True
+        config_path = Path(
+            self.env_config.get("SUPERSET_CONFIG_PATH", "superset/superset_config.py")
+        ).resolve()
+        return write_config(log, config_path, self.superset_config, force=force)
 
     def initialize(self, force: bool = False) -> None:
         """Initialize the superset extension.

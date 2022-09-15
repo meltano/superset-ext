@@ -8,3 +8,5 @@ allow-star-arg-any = true
 per-file-ignores =
     # missing params in docstring
     main.py: DAR101
+    # Don't require docstrings or type annotations in tests
+    tests/*:D100,D102,D103,D104,DAR,ANN
