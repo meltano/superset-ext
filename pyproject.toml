@@ -16,6 +16,7 @@ typer = "^0.6.1"
 "meltano.edk" = {git = "https://github.com/meltano/edk.git", rev="main"}
 
 [tool.poetry.dev-dependencies]
+pytest = "^5.2"
 isort = "^5.10.1"
 black = "^22.6"
 darglint = "^1.8.0"
@@ -37,6 +38,10 @@ warn_return_any = true
 warn_unused_ignores = true
 show_error_codes = true
 exclude = "tests"
+
+[[tool.mypy.overrides]]
+module = ["meltano.edk.*"]
+ignore_missing_imports = true
 
 [build-system]
 requires = ["poetry-core>=1.0.8"]

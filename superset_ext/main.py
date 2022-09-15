@@ -11,7 +11,7 @@ from meltano.edk.logging import default_logging_config, parse_log_level
 
 from superset_ext.extension import Superset
 
-APP_NAME = "Superset"
+APP_NAME = "superset"
 
 log = structlog.get_logger(APP_NAME)
 
