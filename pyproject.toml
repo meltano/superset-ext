@@ -16,9 +16,27 @@ typer = "^0.6.1"
 "meltano.edk" = {git = "https://github.com/meltano/edk.git", rev="main"}
 
 [tool.poetry.dev-dependencies]
-black = "^22.3.0"
 isort = "^5.10.1"
+black = "^22.6"
+darglint = "^1.8.0"
 flake8 = "^3.9.0"
+flake8-annotations = "^2.9.1"
+flake8-docstrings = "^1.6.0"
+mypy = "^0.971"
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3 # Vertical Hanging Indent
+src_paths = "superset_ext"
+
+[tool.mypy]
+disallow_untyped_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_return_any = true
+warn_unused_ignores = true
+show_error_codes = true
+exclude = "tests"
 
 [build-system]
 requires = ["poetry-core>=1.0.8"]
@@ -29,11 +47,6 @@ packages = [
     # uncomment this if you want to include static assets
     # { include = "files_superset-ext.*" }
 ]
-
-[tool.isort]
-profile = "black"
-multi_line_output = 3 # Vertical Hanging Indent
-src_paths = "superset_ext"
 
 # If you need to static assets with your extension, you can add them here.
 # Under a directory path of "files_superset-ext/"

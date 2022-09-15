@@ -85,7 +85,7 @@ class Superset(ExtensionBase):
 
     def create_admin(
         self, username: str, first_name: str, last_name: str, email: str, password: str
-    ):
+    ) -> None:
         """Invoke the underlying superset cli and create an admin user.
 
         Args:
@@ -94,9 +94,6 @@ class Superset(ExtensionBase):
             last_name: The last name of the admin user.
             email: The email of the admin user.
             password: The password of the admin user.
-
-        Returns:
-            Whether the admin user was created.
         """
         try:
             self.superset_invoker.run_and_log(
