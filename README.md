@@ -23,8 +23,8 @@ utilities:
       invoke:
         executable: superset_extension
         args: invoke
-      create_admin:
-        args: create_admin
+      create-admin:
+        args: create-admin
         executable: superset_extension
       ui:
         args: invoke run --port 8088 --host 127.0.0.1
@@ -52,10 +52,9 @@ meltano config superset_ext set SECRET_KEY $(openssl rand -base64 42)
 meltano invoke superset_ext:initialize
 
 # add a superset admin using prompting for required values
-meltano invoke superset_ext:create_admin
+meltano invoke superset_ext:create-admin
 # add a superset admin passing in required values via flags
-meltano invoke superset_ext:create_admin --username=admin --firstname=admin --lastname=admin --
-email=admin@admin --password=password
+meltano invoke superset_ext:create-admin --username=admin --firstname=admin --lastname=admin --email=admin@admin --password=password
 
 # verify that superset can be called via the extensions invoker
 meltano invoke superset_ext version

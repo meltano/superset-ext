@@ -160,7 +160,7 @@ class Superset(ExtensionBase):
                         "pre_invoke",
                         "post_invoke",
                         "initialize",
-                        "create_admin",
+                        "create-admin",
                     ],
                 ),
                 models.InvokerCommand(

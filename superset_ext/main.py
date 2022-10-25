@@ -39,7 +39,7 @@ def initialize(
         sys.exit(1)
 
 
-@app.command(name="create_admin")
+@app.command(name="create-admin")
 def create_admin(
     ctx: typer.Context,
     username: str = typer.Option(
