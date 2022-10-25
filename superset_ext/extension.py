@@ -6,6 +6,7 @@ import subprocess
 import sys
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 import structlog
 from meltano.edk import models
@@ -28,6 +29,11 @@ class Superset(ExtensionBase):
         self.env_config["PATH"] = os.environ.get("PATH", "")
         if not self.env_config.get("FLASK_APP"):
             self.env_config["FLASK_APP"] = "superset"
+        default_db_path = ".meltano/utilities/superset/superset.db"
+        self.env_config.get(
+            "SQLALCHEMY_DATABASE_URI",
+            f"sqlite:///{os.environ.get('MELTANO_PROJECT_ROOT')}/{default_db_path}",
+        )
         self.superset_config = {
             k: v
             for (k, v) in self.env_config.items()
@@ -45,19 +51,47 @@ class Superset(ExtensionBase):
         """Initialize the superset extension.
 
         This will create the superset config file if it doesn't exist,
-        and will run `superset db upgrade`.
+        and initialize the database and superset app.
 
         Args:
             force: Whether to force initialization - rewrite the config file.
         """
         if self._write_config(force=force):
+            db_path = Path(
+                urlparse(self.env_config.get("SQLALCHEMY_DATABASE_URI")).path
+            )
+            os.makedirs(db_path.parent, exist_ok=True)
             try:
+                log.debug("Performing `superset db upgrade`")
                 self.superset_invoker.run("db", "upgrade", stdout=subprocess.DEVNULL)
             except subprocess.CalledProcessError as err:
                 log_subprocess_error(
                     "Superset db upgrade", err, "Superset initialization failed"
                 )
                 sys.exit(err.returncode)
+
+            try:
+                log.debug("Performing `superset init`")
+                self.superset_invoker.run("init", stdout=subprocess.DEVNULL)
+            except subprocess.CalledProcessError as err:
+                log_subprocess_error(
+                    "Superset init", err, "Superset initialization failed"
+                )
+                sys.exit(err.returncode)
+
+            try:
+                log.debug("Performing `superset fab create-permissions`")
+                self.superset_invoker.run(
+                    "fab", "create-permissions", stdout=subprocess.DEVNULL
+                )
+            except subprocess.CalledProcessError as err:
+                log_subprocess_error(
+                    "Superset fab create-permissions",
+                    err,
+                    "Superset initialization failed",
+                )
+                sys.exit(err.returncode)
+
             log.info("Superset initialized, don't forget to configure an admin user!")
         else:
             log.info(
