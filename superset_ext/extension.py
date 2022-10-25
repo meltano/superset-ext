@@ -57,10 +57,8 @@ class Superset(ExtensionBase):
             force: Whether to force initialization - rewrite the config file.
         """
         if self._write_config(force=force):
-            db_path = Path(
-                urlparse(self.env_config.get("SQLALCHEMY_DATABASE_URI")).path
-            )
-            os.makedirs(db_path.parent, exist_ok=True)
+            db_uri = urlparse(self.env_config.get("SQLALCHEMY_DATABASE_URI")).path
+            os.makedirs(os.path.dirname(db_uri), exist_ok=True)
             try:
                 log.debug("Performing `superset db upgrade`")
                 self.superset_invoker.run("db", "upgrade", stdout=subprocess.DEVNULL)
