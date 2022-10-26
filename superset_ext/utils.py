@@ -80,6 +80,10 @@ def write_config(
         "# add any additional config here #",
         "",
     ]
+    log.info(
+        "Writing superset config",
+        config_path=config_path,
+    )
     with open(config_path, "w") as config_file:
         config_file.write("\n".join(config_script_lines))
     return True

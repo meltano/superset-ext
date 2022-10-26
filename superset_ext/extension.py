@@ -43,7 +43,9 @@ class Superset(ExtensionBase):
 
     def _write_config(self, force: bool = False) -> bool:
         config_path = Path(
-            self.env_config.get("SUPERSET_CONFIG_PATH", "superset/superset_config.py")
+            self.env_config.get(
+                "SUPERSET_CONFIG_PATH", "analyze/superset/superset_config.py"
+            )
         ).resolve()
         return write_config(log, config_path, self.superset_config, force=force)
 
@@ -60,7 +62,7 @@ class Superset(ExtensionBase):
             db_uri = urlparse(self.env_config.get("SQLALCHEMY_DATABASE_URI")).path
             os.makedirs(os.path.dirname(db_uri), exist_ok=True)
             try:
-                log.debug("Performing `superset db upgrade`")
+                log.info("Performing 'superset db upgrade'")
                 self.superset_invoker.run("db", "upgrade", stdout=subprocess.DEVNULL)
             except subprocess.CalledProcessError as err:
                 log_subprocess_error(
@@ -69,7 +71,7 @@ class Superset(ExtensionBase):
                 sys.exit(err.returncode)
 
             try:
-                log.debug("Performing `superset init`")
+                log.info("Performing 'superset init'")
                 self.superset_invoker.run("init", stdout=subprocess.DEVNULL)
             except subprocess.CalledProcessError as err:
                 log_subprocess_error(
@@ -78,7 +80,7 @@ class Superset(ExtensionBase):
                 sys.exit(err.returncode)
 
             try:
-                log.debug("Performing `superset fab create-permissions`")
+                log.info("Performing 'superset fab create-permissions'")
                 self.superset_invoker.run(
                     "fab", "create-permissions", stdout=subprocess.DEVNULL
                 )
