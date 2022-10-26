@@ -45,6 +45,48 @@ def load_config_from_env(prefix: str, trimmed: bool = False) -> dict:
     }
 
 
+def prepared_env(prefix: str) -> dict[str, str]:
+    """Prepare the environment for running superset.
+
+    Args:
+        prefix: The prefix to use when loading environment variables.
+
+    Returns:
+        Dict version of the prepared environment.
+    """
+    env_config = load_config_from_env(prefix, trimmed=True)
+    env_config["PATH"] = os.environ.get("PATH", "")
+
+    if not env_config.get("FLASK_APP"):
+        env_config["FLASK_APP"] = "superset"
+
+    default_home = (
+        f"{os.environ.get('MELTANO_PROJECT_ROOT')}/.meltano/utilities/superset"
+    )
+    default_analyze_dir = f"{os.environ.get('MELTANO_PROJECT_ROOT')}/analyze/superset"
+
+    # superset_home and superset_config_path are a special case
+    # we need to preserve the superset prefix as its part of the config key
+    env_config["SUPERSET_HOME"] = env_config.get("HOME", default_home)
+    try:
+        del env_config["HOME"]
+    except KeyError:
+        pass
+
+    env_config["SUPERSET_CONFIG_PATH"] = env_config.get(
+        "CONFIG_PATH", f"{default_analyze_dir}/superset_config.py"
+    )
+    try:
+        del env_config["CONFIG_PATH"]
+    except KeyError:
+        pass
+
+    if not env_config.get("SQLALCHEMY_DATABASE_URI"):
+        env_config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{default_home}/superset.db"
+
+    return env_config
+
+
 def write_config(
     log: structlog.BoundLogger,
     config_path: Path,

@@ -13,9 +13,11 @@ from meltano.edk import models
 from meltano.edk.extension import ExtensionBase
 from meltano.edk.process import Invoker, log_subprocess_error
 
-from superset_ext.utils import load_config_from_env, write_config
+from superset_ext.utils import prepared_env, write_config
 
 log = structlog.get_logger("superset_extension")
+
+ENV_PREFIX = "SUPERSET_"
 
 
 class Superset(ExtensionBase):
@@ -24,22 +26,15 @@ class Superset(ExtensionBase):
     def __init__(self) -> None:
         """Initialize the extension."""
         self.superset_bin = "superset"  # verify this is the correct name
-        self.env_prefix = "SUPERSET_"
-        self.env_config = load_config_from_env(self.env_prefix, trimmed=True)
-        self.env_config["PATH"] = os.environ.get("PATH", "")
-        if not self.env_config.get("FLASK_APP"):
-            self.env_config["FLASK_APP"] = "superset"
-        default_db_path = ".meltano/utilities/superset/superset.db"
-        self.env_config.get(
-            "SQLALCHEMY_DATABASE_URI",
-            f"sqlite:///{os.environ.get('MELTANO_PROJECT_ROOT')}/{default_db_path}",
-        )
+        self.env_config = prepared_env(ENV_PREFIX)
+        self.superset_invoker = Invoker(self.superset_bin, env=self.env_config)
+
+        # TODO: this filter can be removed once the ext lives under the `superset` name
         self.superset_config = {
             k: v
             for (k, v) in self.env_config.items()
             if not k.upper().startswith("EXT_")
         }
-        self.superset_invoker = Invoker(self.superset_bin, env=self.env_config)
 
     def _write_config(self, force: bool = False) -> bool:
         config_path = Path(

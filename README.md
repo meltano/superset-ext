@@ -30,9 +30,10 @@ utilities:
         args: invoke run --port 8088 --host 127.0.0.1
     config:
       ROW_LIMIT: 42
+      HOME: $MELTANO_PROJECT_ROOT/.meltano/utilities/superset
       SQLALCHEMY_DATABASE_URI: sqlite:///$MELTANO_PROJECT_ROOT/.meltano/utilities/superset/superset.db
-      SUPERSET_WEBSERVER_PORT: 8088
-      SUPERSET_CONFIG_PATH: $MELTANO_PROJECT_ROOT/superset/superset_config.py
+      WEBSERVER_PORT: 8088
+      CONFIG_PATH: $MELTANO_PROJECT_ROOT/superset/superset_config.py
 ```
 
 ## installation
