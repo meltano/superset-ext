@@ -108,15 +108,13 @@ class Superset(ExtensionBase):
         try:
             self.superset_invoker.run_and_log(
                 None,
-                [
-                    "fab",
-                    "create-admin",
-                    f"--username={username}",
-                    f"--firstname={first_name}",
-                    f"--lastname={last_name}",
-                    f"--email={email}",
-                    f"--password={password}",
-                ],
+                "fab",
+                "create-admin",
+                f"--username={username}",
+                f"--firstname={first_name}",
+                f"--lastname={last_name}",
+                f"--email={email}",
+                f"--password={password}",
             )
         except subprocess.CalledProcessError as err:
             log_subprocess_error(
