@@ -17,13 +17,7 @@ typer = "^0.6.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.1"
-isort = "^5.10.1"
-black = "^22.6"
-darglint = "^1.8.0"
-flake8 = "^3.9.0"
-flake8-annotations = "^2.9.1"
-flake8-docstrings = "^1.6.0"
-mypy = "^0.971"
+mypy = "^0.991"
 
 [tool.isort]
 profile = "black"
