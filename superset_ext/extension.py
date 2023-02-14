@@ -9,8 +9,8 @@ from typing import Any
 from urllib.parse import urlparse
 
 import structlog
-from meltano.edk import models
 from meltano.edk.extension import ExtensionBase
+from meltano.edk.models import Describe, ExtensionCommand, InvokerCommand
 from meltano.edk.process import Invoker, log_subprocess_error
 
 from superset_ext.utils import prepared_env, write_config
@@ -108,15 +108,13 @@ class Superset(ExtensionBase):
         try:
             self.superset_invoker.run_and_log(
                 None,
-                [
-                    "fab",
-                    "create-admin",
-                    f"--username={username}",
-                    f"--firstname={first_name}",
-                    f"--lastname={last_name}",
-                    f"--email={email}",
-                    f"--password={password}",
-                ],
+                "fab",
+                "create-admin",
+                f"--username={username}",
+                f"--firstname={first_name}",
+                f"--lastname={last_name}",
+                f"--email={email}",
+                f"--password={password}",
             )
         except subprocess.CalledProcessError as err:
             log_subprocess_error(
@@ -139,16 +137,16 @@ class Superset(ExtensionBase):
             )
             sys.exit(err.returncode)
 
-    def describe(self) -> models.Describe:
+    def describe(self) -> Describe:
         """Describe the extension.
 
         Returns:
             The extension description
         """
         # TODO: could we auto-generate all or portions of this from typer instead?
-        return models.Describe(
+        return Describe(
             commands=[
-                models.ExtensionCommand(
+                ExtensionCommand(
                     name="superset_extension",
                     description="extension commands",
                     commands=[
@@ -160,7 +158,7 @@ class Superset(ExtensionBase):
                         "create-admin",
                     ],
                 ),
-                models.InvokerCommand(
+                InvokerCommand(
                     name="superset_invoker", description="pass through invoker"
                 ),
             ]
