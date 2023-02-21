@@ -24,7 +24,6 @@ def test_load_config_from_env() -> None:
 
 
 def test_parsed_env(monkeypatch) -> None:
-
     monkeypatch.setenv("SUPERSET_CONFIG", "tests/fixtures/superset_config.py")
     monkeypatch.setenv("SUPERSET_HOME", "tests/fixtures")
     monkeypatch.setenv("SUPERSET_CONFIG_PATH", "tests/fixtures/superset_config.py")
