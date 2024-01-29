@@ -1,4 +1,5 @@
 """Utilities that will probably graduate to be part of the meltano extension sdk."""
+
 from __future__ import annotations
 
 import os

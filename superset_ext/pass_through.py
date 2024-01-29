@@ -1,4 +1,5 @@
 """Passthrough shim for Superset extension."""
+
 import sys
 
 import structlog
